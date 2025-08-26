@@ -7,8 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
         pastEntriesList: document.getElementById('past-entries-list'),
         editButton: document.getElementById('edit-button'),
         dictionaryContainer: document.getElementById('dictionary-words-container'),
+        alphabetNavContainer: document.getElementById('alphabet-nav-container'), // Cached element
     };
-    
+
     // --- Global Variable for Highlighted Word ---
     let highlightedWord = localStorage.getItem('highlightedWord');
     let isEditingMode = false;
@@ -31,16 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
             isEditingMode = !isEditingMode;
             document.body.classList.toggle('editing-mode', isEditingMode);
             DOMElements.editButton.textContent = isEditingMode ? 'Done' : 'Edit';
-            
-            // Toggle contenteditable attribute on past entries
+
             const entries = DOMElements.pastEntriesList.querySelectorAll('li');
             entries.forEach(li => {
                 li.setAttribute('contenteditable', isEditingMode);
-                if (isEditingMode) {
-                    li.classList.add('editing-mode');
-                } else {
-                    li.classList.remove('editing-mode');
-                }
+                li.classList.toggle('editing-mode', isEditingMode);
             });
         });
     }
@@ -56,33 +52,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderEntry(entry) {
         const li = document.createElement('li');
-        li.dataset.timestamp = entry.timestamp; // Use a data attribute for easier lookup
-        
+        li.dataset.timestamp = entry.timestamp;
+
         let entryContent = entry.content;
-        
+
         if (highlightedWord) {
             const wordRegex = new RegExp(`\\b${highlightedWord}\\b`, 'gi');
             entryContent = entry.content.replace(wordRegex, `<span class="highlighted-word">$&</span>`);
         }
-        
+
         li.innerHTML = `<b>${entry.timestamp}</b><br>${entryContent}`;
-        
+
         li.addEventListener('click', () => {
-            // Prevent expansion when in edit mode
             if (!isEditingMode) {
                 li.classList.toggle('expanded');
             }
         });
-        
-        // Listen for changes when in contenteditable mode
+
         li.addEventListener('blur', (event) => {
             if (isEditingMode) {
                 const newContent = event.target.textContent.replace(entry.timestamp, '').trim();
                 updateEntry(entry.timestamp, newContent);
             }
-        });
+        }); // Added missing semicolon
 
-        // Delete button
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
         deleteButton.classList.add('delete-button');
@@ -93,14 +86,13 @@ document.addEventListener('DOMContentLoaded', () => {
         li.appendChild(deleteButton);
         DOMElements.pastEntriesList.prepend(li);
     }
-    
+
     function updateEntry(timestamp, newContent) {
         const entries = JSON.parse(localStorage.getItem('dreamEntries')) || [];
         const entryIndex = entries.findIndex(entry => entry.timestamp === timestamp);
         if (entryIndex !== -1) {
             entries[entryIndex].content = newContent;
             localStorage.setItem('dreamEntries', JSON.stringify(entries));
-            // Reload entries to apply potential new highlights
             loadEntriesFromLocalStorage();
         }
     }
@@ -119,39 +111,71 @@ document.addEventListener('DOMContentLoaded', () => {
         const entries = JSON.parse(localStorage.getItem('dreamEntries')) || [];
         entries.reverse().forEach(entry => renderEntry(entry));
     }
-    
+
     // --- Dream Dictionary Functionality ---
     if (DOMElements.dictionaryContainer && typeof dreamInterpretations !== 'undefined') {
+        createAlphabetLinks();
         renderDictionary();
     }
 
     function renderDictionary() {
-        const words = Object.keys(dreamInterpretations).sort();
-        words.forEach(word => {
-            const wordElement = document.createElement('div');
-            wordElement.classList.add('dictionary-word');
-            wordElement.textContent = word.charAt(0).toUpperCase() + word.slice(1);
-            wordElement.dataset.word = word;
+        const container = DOMElements.dictionaryContainer;
+        container.innerHTML = '';
 
-            if (highlightedWord && highlightedWord.toLowerCase() === word.toLowerCase()) {
-                wordElement.classList.add('selected');
-            }
+        const letters = Object.keys(dreamInterpretations).sort();
+        letters.forEach(letter => {
+            const letterHeading = document.createElement('h2');
+            letterHeading.textContent = letter;
+            letterHeading.id = letter;
+            container.appendChild(letterHeading);
 
-            wordElement.addEventListener('contextmenu', (event) => {
-                event.preventDefault();
-                createContextMenu(event.clientX, event.clientY, word);
+            const wordListContainer = document.createElement('div');
+            wordListContainer.classList.add('word-group');
+
+            const letterWords = dreamInterpretations[letter];
+            letterWords.forEach(wordObj => {
+                const wordElement = document.createElement('div');
+                wordElement.classList.add('dictionary-word');
+                wordElement.textContent = wordObj.word.charAt(0).toUpperCase() + wordObj.word.slice(1);
+                wordElement.dataset.word = wordObj.word;
+
+                if (highlightedWord && highlightedWord.toLowerCase() === wordObj.word.toLowerCase()) {
+                    wordElement.classList.add('selected');
+                }
+
+                wordElement.addEventListener('click', () => {
+                    document.querySelectorAll('.definition-text').forEach(el => el.remove());
+                    const definition = wordObj.definition;
+                    const definitionElement = document.createElement('p');
+                    definitionElement.classList.add('definition-text');
+                    definitionElement.textContent = definition;
+                    wordElement.appendChild(definitionElement);
+                });
+
+                wordElement.addEventListener('contextmenu', (event) => {
+                    event.preventDefault();
+                    createContextMenu(event.clientX, event.clientY, wordObj.word);
+                });
+
+                wordListContainer.appendChild(wordElement);
             });
+            container.appendChild(wordListContainer);
+        });
+    }
 
-            wordElement.addEventListener('click', () => {
-                document.querySelectorAll('.definition-text').forEach(el => el.remove());
-                const definition = dreamInterpretations[word];
-                const definitionElement = document.createElement('p');
-                definitionElement.classList.add('definition-text');
-                definitionElement.textContent = definition;
-                wordElement.appendChild(definitionElement);
-            });
+    function createAlphabetLinks() {
+        const navContainer = DOMElements.alphabetNavContainer;
+        if (!navContainer) return;
 
-            DOMElements.dictionaryContainer.appendChild(wordElement);
+        navContainer.innerHTML = '';
+        const letters = Object.keys(dreamInterpretations).sort();
+
+        letters.forEach(letter => {
+            const a = document.createElement('a');
+            a.href = `#${letter}`;
+            a.textContent = letter;
+            a.classList.add('alphabet-link');
+            navContainer.appendChild(a);
         });
     }
 
@@ -160,13 +184,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const menu = document.createElement('ul');
         menu.classList.add('context-menu');
-        
+
         const highlightOption = document.createElement('li');
         highlightOption.textContent = 'Highlight Word';
         highlightOption.addEventListener('click', () => {
             highlightedWord = word;
             localStorage.setItem('highlightedWord', word);
-            
             loadEntriesFromLocalStorage();
             menu.remove();
         });
@@ -178,7 +201,6 @@ document.addEventListener('DOMContentLoaded', () => {
             removeHighlightOption.addEventListener('click', () => {
                 highlightedWord = null;
                 localStorage.removeItem('highlightedWord');
-                
                 loadEntriesFromLocalStorage();
                 menu.remove();
             });
@@ -196,5 +218,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
 });
