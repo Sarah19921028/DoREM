@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pastEntriesList: document.getElementById('past-entries-list'),
         editButton: document.getElementById('edit-button'),
         dictionaryContainer: document.getElementById('dictionary-words-container'),
-        alphabetNavContainer: document.getElementById('alphabet-nav-container'), // Cached element
+        alphabetNavContainer: document.getElementById('alphabet-nav-container'),
     };
 
     // --- Global Variable for Highlighted Word ---
@@ -54,11 +54,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const li = document.createElement('li');
         li.dataset.timestamp = entry.timestamp;
 
-        let entryContent = entry.content;
+        // Use a temporary div to handle innerHTML and prevent security issues
+        const tempDiv = document.createElement('div');
+        tempDiv.textContent = entry.content;
+        let entryContent = tempDiv.innerHTML;
 
+        // Check for the highlighted word and replace it with a styled span
         if (highlightedWord) {
             const wordRegex = new RegExp(`\\b${highlightedWord}\\b`, 'gi');
-            entryContent = entry.content.replace(wordRegex, `<span class="highlighted-word">$&</span>`);
+            entryContent = entryContent.replace(wordRegex, `<span class="highlighted-word">$&</span>`);
         }
 
         li.innerHTML = `<b>${entry.timestamp}</b><br>${entryContent}`;
@@ -74,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const newContent = event.target.textContent.replace(entry.timestamp, '').trim();
                 updateEntry(entry.timestamp, newContent);
             }
-        }); // Added missing semicolon
+        });
 
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
@@ -113,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Dream Dictionary Functionality ---
+    // Make sure 'dreamInterpretations' is available globally (from definitions.js)
     if (DOMElements.dictionaryContainer && typeof dreamInterpretations !== 'undefined') {
         createAlphabetLinks();
         renderDictionary();
@@ -124,42 +129,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const letters = Object.keys(dreamInterpretations).sort();
         letters.forEach(letter => {
-            const letterHeading = document.createElement('h2');
-            letterHeading.textContent = letter;
+            // Create a heading for the letter as the anchor point for the nav
+            const letterHeading = document.createElement('h3');
             letterHeading.id = letter;
+            letterHeading.textContent = letter;
             container.appendChild(letterHeading);
-
-            const wordListContainer = document.createElement('div');
-            wordListContainer.classList.add('word-group');
 
             const letterWords = dreamInterpretations[letter];
             letterWords.forEach(wordObj => {
                 const wordElement = document.createElement('div');
                 wordElement.classList.add('dictionary-word');
-                wordElement.textContent = wordObj.word.charAt(0).toUpperCase() + wordObj.word.slice(1);
                 wordElement.dataset.word = wordObj.word;
+                
+                // Capitalize the word for display
+                const displayWord = wordObj.word.charAt(0).toUpperCase() + wordObj.word.slice(1);
+                
+                // Use a different element for the definition to use CSS for hover
+                wordElement.innerHTML = `
+                    <div class="word-text">${displayWord}</div>
+                    <div class="definition-text">${wordObj.definition}</div>
+                `;
 
                 if (highlightedWord && highlightedWord.toLowerCase() === wordObj.word.toLowerCase()) {
                     wordElement.classList.add('selected');
                 }
 
-                wordElement.addEventListener('click', () => {
-                    document.querySelectorAll('.definition-text').forEach(el => el.remove());
-                    const definition = wordObj.definition;
-                    const definitionElement = document.createElement('p');
-                    definitionElement.classList.add('definition-text');
-                    definitionElement.textContent = definition;
-                    wordElement.appendChild(definitionElement);
-                });
-
+                // Attach right-click event listener for context menu
                 wordElement.addEventListener('contextmenu', (event) => {
                     event.preventDefault();
                     createContextMenu(event.clientX, event.clientY, wordObj.word);
                 });
 
-                wordListContainer.appendChild(wordElement);
+                container.appendChild(wordElement);
             });
-            container.appendChild(wordListContainer);
         });
     }
 
@@ -191,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
             highlightedWord = word;
             localStorage.setItem('highlightedWord', word);
             loadEntriesFromLocalStorage();
+            renderDictionary(); // Rerender to show the 'selected' class
             menu.remove();
         });
         menu.appendChild(highlightOption);
@@ -202,6 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 highlightedWord = null;
                 localStorage.removeItem('highlightedWord');
                 loadEntriesFromLocalStorage();
+                renderDictionary(); // Rerender to remove the 'selected' class
                 menu.remove();
             });
             menu.appendChild(removeHighlightOption);
@@ -216,6 +220,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!menu.contains(e.target)) {
                 menu.remove();
             }
-        });
+        }, { once: true }); // Use { once: true } for better performance
     }
 });
