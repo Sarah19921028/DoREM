@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dream Dictionary</title>
+    <style>
+        /* Simple styling for the dictionary */
+        #dictionary-container {
+            margin-top: 20px;
+            max-width: 600px;
+        }
+        .dictionary-entry {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .dictionary-entry h3 {
+            margin-top: 0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dream Dictionary</h1>
+
+    <input type="text" id="search-input" placeholder="Search for a symbol (e.g., cat, water, house)">
+    <button onclick="filterDictionary()">Search</button>
+    <button onclick="displayAllEntries()">Show All</button>
+
+    <div id="dictionary-container">
+        <p>Start searching for dream symbols above.</p>
+    </div>
+
+    <hr>
+    <a href="dreampage.html">Enter New Dream</a> | 
+    <a href="dreampage_entries.html">View Entries</a>
+
+    <script>
+        
+
+const dreamDictionaryData = [
+    { symbol: "Cat", meaning: "Often represents independence, femininity, or intuition. A black cat may indicate fear or superstition." },
+    { symbol: "Water", meaning: "Represents emotions, the subconscious, and the state of your inner life. Clear water suggests peace; turbulent water suggests turmoil." },
+    { symbol: "House", meaning: "Represents the self. Different rooms relate to different aspects of your personality or life: attic is memory, basement is the subconscious." },
+    { symbol: "Flying", meaning: "Symbolizes a sense of freedom, control, or a desire to escape reality or overcome obstacles." },
+    { symbol: "Teeth", meaning: "Relates to power, confidence, or fear of losing control. Losing teeth specifically points to feelings of helplessness or anxiety." },
+    { symbol: "Snake", meaning: "Can represent healing (renewal/shedding skin), transformation, or fear, hidden threats, or temptation." }
+    // Add more entries here!
+];
+
+function displayEntries(entries) {
+            const container = document.getElementById('dictionary-container');
+            container.innerHTML = ''; 
+       
+            
+            if (entries.length === 0) {
+                container.innerHTML = '<p>No matching symbols found. Try a different word!</p>';
+                return;
+            }
+
+            entries.sort((a, b) => a.symbol.localeCompare(b.symbol));
+
+            entries.forEach(entry => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'dictionary-entry';
+
+                const symbolHeader = document.createElement('h3');
+                symbolHeader.textContent = entry.symbol;
+                entryDiv.appendChild(symbolHeader);
+
+                const meaningParagraph = document.createElement('p');
+                meaningParagraph.textContent = entry.meaning;
+                entryDiv.appendChild(meaningParagraph);
+
+                container.appendChild(entryDiv);
+            });
+        }
+
+       
+        function filterDictionary() {
+            const input = document.getElementById('search-input').value.toLowerCase();
+            
+            const filteredResults = dreamDictionaryData.filter(entry => 
+                entry.symbol.toLowerCase().includes(input) || 
+                entry.meaning.toLowerCase().includes(input)
+            );
+
+            displayEntries(filteredResults);
+        }
+
+       
+        function displayAllEntries() {
+            document.getElementById('search-input').value = ''; 
+            displayEntries(dreamDictionaryData);
+        }
+
+       
+        window.onload = displayAllEntries;
+    </script>
+</body>
+</html>

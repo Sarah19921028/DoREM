@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Past Dream Entries</title>
+    <style>
+        .dream-post {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .dream-post h3 {
+            margin-top: 0;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dream Entries</h1>
+    
+    <div id="entriesContainer"></div> 
+
+    <hr>
+   
+   
+    <footer>
+    <p>
+        <a href="index.html">Home</a> | 
+        <a href="dreampage.html">New Dream</a> | 
+        <a href="dreamdictionary.html">Dream Dictionary</a>
+    </p>
+</footer>
+
+    <script>
+        function loadDreamEntries() {
+            const entriesContainer = document.getElementById('entriesContainer');
+            entriesContainer.innerHTML = ''; // Clear existing content
+
+
+
+            // 1. Retrieve and parse dreams from localStorage
+            const dreams = JSON.parse(localStorage.getItem('dreamEntries')) || [];
+            
+
+
+            // 2. Optional: Create a reversed copy to show newest dreams first
+            const displayDreams = [...dreams].reverse();
+
+            if (displayDreams.length === 0) {
+                entriesContainer.innerHTML = '<p>No dream entries found. Start by adding a new dream!</p>';
+                return;
+            }
+
+
+
+            // 3. Create and append dream entries
+            displayDreams.forEach((dream, index) => {
+                const dreamDiv = document.createElement('div');
+                dreamDiv.className = 'dream-post';
+
+                // Display Date
+                const dreamTitle = document.createElement('h3');
+                // You can customize the title display
+                dreamTitle.textContent = `Dream on: ${dream.date}`; 
+                dreamDiv.appendChild(dreamTitle);
+
+                // Display Description - Use innerHTML and replace to handle line breaks (\n)
+                const dreamDesc = document.createElement('p');
+                dreamDesc.innerHTML = dream.description.replace(/\n/g, '<br>');
+                dreamDiv.appendChild(dreamDesc);
+
+                entriesContainer.appendChild(dreamDiv);
+            });
+        }
+
+
+
+
+
+        // Load dream entries when the page loads
+        window.onload = loadDreamEntries;
+    </script>
+</body>
+</html>

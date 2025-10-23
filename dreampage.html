@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diary of REM Dream Page</title>
+</head>
+<body>
+    <main class="grid-container">
+        <section class="dream-entry">
+            <h2>Dream Page</h2>
+            
+
+<form id="dreamForm"> <label for="dreamDate">Date:</label>
+    <input type="date" id="dreamDate" name="dreamDate" required><br><br>
+
+    <label for="dreamDescription">Dream Description:</label><br>
+    <textarea id="dreamDescription" name="dreamDescription" rows="4" cols="50" required></textarea><br><br>
+
+    <button type="submit">Save Dream</button> 
+</form>
+
+            </section> 
+
+        </main>
+<footer>
+    <p>
+        <a href="index.html">Home</a> | 
+        <a href="dreampage_entries.html">Past Entries</a> | 
+        <a href="dreamdictionary.html">Dream Dictionary</a>
+    </p>
+</footer>
+
+<script>
+    document.getElementById('dreamForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // STOP the browser from submitting the form conventionally
+
+        
+        const dateInput = document.getElementById('dreamDate').value;
+        const descriptionInput = document.getElementById('dreamDescription').value;
+
+        
+        const existingEntries = JSON.parse(localStorage.getItem('dreamEntries')) || [];
+
+              const newDream = {<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diary of REM Dream Page</title>
+</head>
+<body>
+    <main class="grid-container">
+        <section class="dream-entry">
+            <h2>Dream Page</h2>
+            
+
+<form id="dreamForm"> <label for="dreamDate">Date:</label>
+    <input type="date" id="dreamDate" name="dreamDate" required><br><br>
+
+    <label for="dreamDescription">Dream Description:</label><br>
+    <textarea id="dreamDescription" name="dreamDescription" rows="4" cols="50" required></textarea><br><br>
+
+    <button type="submit">Save Dream</button> 
+</form>
+
+            </section> 
+
+        </main>
+<footer>
+    <p>
+        <a href="index.html">Home</a> | 
+        <a href="dreampage_entries.html">Past Entries</a> | 
+        <a href="dreamdictionary.html">Dream Dictionary</a>
+    </p>
+</footer>
+
+<script>
+    document.getElementById('dreamForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // STOP the browser from submitting the form conventionally
+
+        
+        const dateInput = document.getElementById('dreamDate').value;
+        const descriptionInput = document.getElementById('dreamDescription').value;
+
+        
+        const existingEntries = JSON.parse(localStorage.getItem('dreamEntries')) || [];
+
+              const newDream = {
+            date: dateInput,
+            description: descriptionInput
+        };
+        existingEntries.push(newDream);
+
+      
+        localStorage.setItem('dreamEntries', JSON.stringify(existingEntries));
+
+      
+        document.getElementById('dreamForm').reset();
+        
+        
+        window.location.href = 'dreampage_entries.html';
+    });
+</script>
+
+</body>
+</html>
+            date: dateInput,
+            description: descriptionInput
+        };
+        existingEntries.push(newDream);
+
+      
+        localStorage.setItem('dreamEntries', JSON.stringify(existingEntries));
+
+      
+        document.getElementById('dreamForm').reset();
+        
+        
+        window.location.href = 'dreampage_entries.html';
+    });
+</script>
+
+</body>
+</html>
